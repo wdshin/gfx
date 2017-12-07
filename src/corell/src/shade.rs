@@ -14,6 +14,9 @@
 
 //! Shader handling.
 
+use std::error::Error;
+use std::fmt;
+
 /// Shader pipeline stage
 #[derive(Copy, Clone, Debug, Hash, PartialEq, Eq)]
 pub enum Stage {
@@ -51,4 +54,25 @@ pub enum CreateShaderError {
     CompilationFailed(String),
     /// Library source type is not supported.
     LibrarySourceNotSupported,
+}
+
+impl fmt::Display for CreateShaderError {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match *self {
+            CreateShaderError::StageNotSupported(ref s) => write!(f, "{}: {:?}", self.description(), s),
+            CreateShaderError::CompilationFailed(ref e) => write!(f, "{}: {}", self.description(), e),
+            _ => f.write_str(self.description()),
+        }
+    }
+}
+
+impl Error for CreateShaderError {
+    fn description(&self) -> &str {
+        match *self {
+            CreateShaderError::ModelNotSupported => "unsupported resource heap type",
+            CreateShaderError::StageNotSupported(_) => "stage not supported",
+            CreateShaderError::CompilationFailed(_) => "compilation failed",
+            CreateShaderError::LibrarySourceNotSupported => "library source not supported",
+        }
+    }
 }

@@ -22,6 +22,8 @@ extern crate winit;
 extern crate gfx_core as core;
 extern crate gfx_device_dx11 as device_dx11;
 
+use std::error::Error;
+use std::fmt;
 use std::ptr;
 use winit::os::windows::WindowExt;
 use core::{format, handle as h, factory as f, memory, texture as tex};
@@ -98,6 +100,25 @@ pub enum InitError {
     Format(format::Format),
     /// Unable to find a supported driver type.
     DriverType,
+}
+
+impl fmt::Display for InitError {
+    fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
+        match *self {
+            InitError::Format(ref f) => write!(fmt, "{}: {:?}", self.description(), f),
+            _ => fmt.write_str(self.description()),
+        }
+    }
+}
+
+impl Error for InitError {
+    fn description(&self) -> &str {
+        match *self {
+            InitError::Window => "unable to create a window",
+            InitError::Format(_) => "unable to map format",
+            InitError::DriverType => "unable to find a supported driver type",
+        }
+    }
 }
 
 /// Initialize with a given size. Typed format version.
